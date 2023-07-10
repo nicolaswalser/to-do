@@ -1,16 +1,76 @@
-const dateFormat = "mm/dd/yyyy";
+const addButton = document.getElementById("addButton");
+const dateInput = document.getElementById("dateInput");
+const taskInput = document.getElementById("taskInput");
+const taskList = document.getElementById("taskList");
 
-let date = prompt("Enter the date 'mm/dd/yyyy' for your to-do.");
-if (date.length != dateFormat.length) {
-  alert("You did not enter a valid date.");
-} else {
-  let amount = parseInt(prompt("Enter the amount of events to-do."));
-  let list = "";
+const toDos = [];
 
-  for (let i = 1; i <= amount; i++) {
-    let toDo = prompt("Type your to-do activity");
-    list += toDo + "\n";
+class ToDo {
+  constructor(date, task) {
+    this.date = date;
+    this.task = task;
+    this.completed = false;
   }
 
-  alert("On " + date + ", you must:\n" + list);
+  toggleComplete() {
+    this.completed = !this.completed;
+  }
 }
+
+function createToDoItem(toDo) {
+  const li = document.createElement("li");
+  const checkbox = document.createElement("input");
+  const taskText = document.createElement("span");
+  const removeButton = document.createElement("span");
+
+  checkbox.type = "checkbox";
+  checkbox.classList.add("checkbox");
+  checkbox.addEventListener("change", function () {
+    toDo.toggleComplete();
+    taskText.classList.toggle("completed");
+  });
+
+  taskText.classList.add("task");
+  taskText.textContent = toDo.task;
+
+  removeButton.classList.add("remove");
+  removeButton.textContent = "Remove";
+  removeButton.addEventListener("click", function () {
+    const index = toDos.findIndex((item) => item === toDo);
+    if (index !== -1) {
+      toDos.splice(index, 1);
+      li.remove();
+    }
+  });
+
+  li.appendChild(checkbox);
+  li.appendChild(taskText);
+  li.appendChild(removeButton);
+  taskList.appendChild(li);
+}
+
+function clearInputs() {
+  dateInput.value = "";
+  taskInput.value = "";
+  dateInput.style.border = "";
+  taskInput.style.border = "";
+}
+
+addButton.addEventListener("click", function () {
+  const date = dateInput.value;
+  const task = taskInput.value;
+
+  if (date && task) {
+    const newToDo = new ToDo(date, task);
+    toDos.push(newToDo);
+    createToDoItem(newToDo);
+    clearInputs();
+  } else {
+    if (!date) {
+      dateInput.style.border = "1px solid red";
+    }
+    if (!task) {
+      taskInput.style.border = "1px solid red";
+    }
+  }
+});
