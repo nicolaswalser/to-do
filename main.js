@@ -22,6 +22,19 @@ function createToDoItem(toDo) {
   const checkbox = document.createElement("input");
   const taskText = document.createElement("span");
   const removeButton = document.createElement("span");
+  let dateSection = document.getElementById(toDo.date);
+
+  if (!dateSection) {
+    dateSection = document.createElement("div");
+    dateSection.id = toDo.date;
+    dateSection.classList.add("date-section");
+
+    const dateHeading = document.createElement("h2");
+    dateHeading.textContent = toDo.date;
+    dateSection.appendChild(dateHeading);
+
+    taskList.appendChild(dateSection);
+  }
 
   checkbox.type = "checkbox";
   checkbox.classList.add("checkbox");
@@ -47,6 +60,7 @@ function createToDoItem(toDo) {
   li.appendChild(taskText);
   li.appendChild(removeButton);
   taskList.appendChild(li);
+  dateSection.appendChild(li);
 }
 
 function clearInputs() {
