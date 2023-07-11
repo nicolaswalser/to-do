@@ -1,102 +1,132 @@
-/*
-  Una aplicación simple de lista de tareas que permite a los usuarios 
-  agregar tareas con fechas, marcarlas como completadas o eliminarlas. 
-*/
-
 const addButton = document.getElementById("addButton");
 const dateInput = document.getElementById("dateInput");
 const taskInput = document.getElementById("taskInput");
 const taskList = document.getElementById("taskList");
 
-const toDos = [];
+const tasks = [];
 
-class ToDo {
-  constructor(date, task) {
+class Task {
+  constructor(date, description) {
     this.date = date;
-    this.task = task;
+    this.description = description;
     this.completed = false;
   }
 
-  toggleComplete() {
+  toggleCompletion() {
     this.completed = !this.completed;
   }
 }
 
-function createToDoItem(toDo) {
-  const li = document.createElement("li");
-  const checkbox = document.createElement("input");
-  const taskText = document.createElement("span");
+function createTaskElement(task) {
+  const listItem = document.createElement("li");
+  const checkbox = createCheckbox(task);
+  const descriptionText = createDescription(task);
+  const removeButton = createRemoveButton(task, listItem);
+  const dateSection = createDateSection(task.date);
+
+  listItem.appendChild(checkbox);
+  listItem.appendChild(descriptionText);
+  listItem.appendChild(removeButton);
+  dateSection.appendChild(listItem);
+}
+
+function createRemoveButton(task, listItem) {
   const removeButton = document.createElement("span");
-  let dateSection = document.getElementById(toDo.date);
+  removeButton.classList.add("remove");
+  removeButton.textContent = "Remove";
+  removeButton.addEventListener("click", () => {
+    handleRemoveButtonClick(task, listItem);
+  });
+
+  return removeButton;
+}
+
+function createCheckbox(task) {
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.classList.add("checkbox");
+  checkbox.addEventListener("change", () => {
+    handleCheckboxChange(task, checkbox);
+  });
+
+  return checkbox;
+}
+
+function createDescription(task) {
+  const descriptionText = document.createElement("span");
+  descriptionText.classList.add("task");
+  descriptionText.textContent = task.description;
+  return descriptionText;
+}
+
+function createDateSection(date) {
+  let dateSection = document.getElementById(date);
 
   if (!dateSection) {
-    // Create a new date section if it doesn't exist
     dateSection = document.createElement("div");
-    dateSection.id = toDo.date;
+    dateSection.id = date;
     dateSection.classList.add("date-section");
 
     const dateHeading = document.createElement("h2");
-    dateHeading.textContent = toDo.date;
+    dateHeading.textContent = date;
     dateSection.appendChild(dateHeading);
 
     taskList.appendChild(dateSection);
   }
 
-  checkbox.type = "checkbox";
-  checkbox.classList.add("checkbox");
-  checkbox.addEventListener("change", function () {
-    // Toggle the completion status of the ToDo object
-    toDo.toggleComplete();
-    // Toggle the "completed" class on the task text
-    taskText.classList.toggle("completed");
-  });
-
-  taskText.classList.add("task");
-  taskText.textContent = toDo.task;
-
-  removeButton.classList.add("remove");
-  removeButton.textContent = "Remove";
-  removeButton.addEventListener("click", function () {
-    // Remove the ToDo object from the list and the corresponding HTML element
-    const index = toDos.findIndex((item) => item === toDo);
-    if (index !== -1) {
-      toDos.splice(index, 1);
-      li.remove();
-    }
-  });
-
-  li.appendChild(checkbox);
-  li.appendChild(taskText);
-  li.appendChild(removeButton);
-  taskList.appendChild(li);
-  dateSection.appendChild(li);
+  return dateSection;
 }
 
-function clearInputs() {
-  // Clear the input fields and remove the red border
+function clearInputFields() {
   dateInput.value = "";
   taskInput.value = "";
-  dateInput.style.border = "";
-  taskInput.style.border = "";
+  dateInput.classList.remove("error");
+  taskInput.classList.remove("error");
 }
 
-addButton.addEventListener("click", function () {
-  const date = dateInput.value;
-  const task = taskInput.value;
+function handleCheckboxChange(task, checkbox) {
+  task.toggleCompletion();
+  const descriptionText = checkbox.nextSibling;
+  descriptionText.classList.toggle("completed");
+}
 
-  if (date && task) {
-    // Create a new ToDo object and add it to the list
-    const newToDo = new ToDo(date, task);
-    toDos.push(newToDo);
-    createToDoItem(newToDo);
-    clearInputs();
+function handleRemoveButtonClick(task, listItem) {
+  const index = tasks.indexOf(task);
+  if (index !== -1) {
+    tasks.splice(index, 1);
+    listItem.remove();
+  }
+}
+
+function addTask() {
+  const date = dateInput.value.trim();
+  const description = taskInput.value.trim();
+
+  if (date && description) {
+    const newTask = new Task(date, description);
+    tasks.push(newTask);
+    createTaskElement(newTask);
+    clearInputFields();
   } else {
     if (!date) {
-      // Apply red border to the date input field if it's empty
       dateInput.style.border = "1px solid red";
+    } else {
+      dateInput.style.border = "none";
     }
-    if (!task) {
+    if (!description) {
       taskInput.style.border = "1px solid red";
+    } else {
+      taskInput.style.border = "none";
     }
   }
+}
+
+dateInput.addEventListener("input", () => {
+  dateInput.style.border = "none";
 });
+
+taskInput.addEventListener("input", () => {
+  taskInput.style.border = "none";
+});
+
+addButton.addEventListener("click", addTask);
